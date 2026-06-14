@@ -1,6 +1,6 @@
 ## Mlx related
 Makefile.gen
-/test/mlx-test
+/test/mlx-test*
 
 ## Editor
 .vscode/*

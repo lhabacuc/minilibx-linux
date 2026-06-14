@@ -14,5 +14,20 @@
 
 int	mlx_destroy_display(t_xvar *xvar)
 {
+	t_win_list	*w;
+	t_win_list	*next;
+
+	w = xvar->win_list;
+	while (w)
+	{
+		next = w->next;
+		XFreeGC(xvar->display, w->gc);
+		free(w);
+		w = next;
+	}
+	xvar->win_list = NULL;
+	if (xvar->private_cmap)
+		XFreeColormap(xvar->display, xvar->cmap);
 	XCloseDisplay(xvar->display);
+	return (0);
 }

@@ -75,6 +75,7 @@ int		mlx_int_deal_shm(t_xvar *xvar)
 		xvar->pshm_format = -1;
 		xvar->use_xshm = 0;
 	}
+	return (0);
 }
 
 /*
@@ -83,17 +84,25 @@ int		mlx_int_deal_shm(t_xvar *xvar)
 
 int		mlx_int_rgb_conversion(t_xvar *xvar)
 {
+	unsigned long	r;
+	unsigned long	g;
+	unsigned long	b;
+
 	bzero(xvar->decrgb,sizeof(int)*6);
-	while (!(xvar->visual->red_mask&1))
-		{ xvar->visual->red_mask >>= 1; xvar->decrgb[0] ++; }
-	while (xvar->visual->red_mask&1)
-		{ xvar->visual->red_mask >>= 1; xvar->decrgb[1] ++; }
-	while (!(xvar->visual->green_mask&1))
-		{ xvar->visual->green_mask >>= 1; xvar->decrgb[2] ++; }
-	while (xvar->visual->green_mask&1)
-		{ xvar->visual->green_mask >>= 1; xvar->decrgb[3] ++; }
-	while (!(xvar->visual->blue_mask&1))
-		{ xvar->visual->blue_mask >>= 1; xvar->decrgb[4] ++; }
-	while (xvar->visual->blue_mask&1)
-		{ xvar->visual->blue_mask >>= 1; xvar->decrgb[5] ++; }
+	r = xvar->visual->red_mask;
+	g = xvar->visual->green_mask;
+	b = xvar->visual->blue_mask;
+	while (!(r&1))
+		{ r >>= 1; xvar->decrgb[0] ++; }
+	while (r&1)
+		{ r >>= 1; xvar->decrgb[1] ++; }
+	while (!(g&1))
+		{ g >>= 1; xvar->decrgb[2] ++; }
+	while (g&1)
+		{ g >>= 1; xvar->decrgb[3] ++; }
+	while (!(b&1))
+		{ b >>= 1; xvar->decrgb[4] ++; }
+	while (b&1)
+		{ b >>= 1; xvar->decrgb[5] ++; }
+	return (0);
 }

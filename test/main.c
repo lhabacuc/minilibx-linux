@@ -1,5 +1,6 @@
 
 #include	"mlx.h"
+#include	"mlx_ext.h"
 #include <X11/X.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,57 +51,77 @@ int	color_map_2(unsigned char *data,int bpp,int sl,int w,int h,int endian, int t
 
 int	expose_win1(void *p)
 {
+  (void)p;
   mlx_put_image_to_window(mlx,win1,im3,0,0);
+  return (0);
 }
 
 int	expose_win2(void *p)
 {
+  (void)p;
   mlx_put_image_to_window(mlx,win2,im4,0,0);
   mlx_put_image_to_window(mlx,win2,im2,0,0);
+  return (0);
 }
 
 int	key_win1(int key,void *p)
 {
+  (void)p;
   printf("Key in Win1 : %d\n",key);
   if (key==0xFF1B)
     exit(0);
+  return (0);
 }
 
 int	key_win2(int key,void *p)
 {
+  (void)p;
   printf("Key in Win2 : %d\n",key);
   if (key==0xFF1B)
     exit(0);
+  return (0);
 }
 
 int	key_win3(int key,void *p)
 {
+  (void)p;
   printf("Key in Win3 : %d\n",key);
   if (key==0xFF1B)
     mlx_destroy_window(mlx,win3);
+  return (0);
 }
 
 int	mouse_win1(int button,int x,int y, void *p)
 {
+  (void)p;
   printf("Mouse in Win1, button %d at %dx%d.\n",button,x,y);
+  return (0);
 }
 
 int	mouse_win2(int button,int x,int y, void *p)
 {
+  (void)p;
   printf("Mouse in Win2, button %d at %dx%d.\n",button,x,y);
+  return (0);
 }
 
 int	mouse_win3(int x,int y, void *p)
 {
+  (void)p;
   printf("Mouse moving in Win3, at %dx%d.\n",x,y);
+  return (0);
 }
 
 
 int	main()
 {
   int	a;
+  int	sp_w;
+  int	sp_h;
+  void	*png_sp;
 
   printf("MinilibX Test Program\n");
+  mlx_ext_print_help("mlx_png_file_to_image");
   a = 0x11223344;
   if (((unsigned char *)&a)[0] == 0x11)
     local_endian = 1;
@@ -143,7 +164,7 @@ int	main()
   printf("OK (bpp1: %d, sizeline1: %d endian: %d)\n",bpp1,sl1,endian1);
 
   printf(" => Fill Image1 ...");
-  color_map_2(data1,bpp1,sl1,IM1_SX,IM1_SY,endian1, 1);
+  color_map_2((unsigned char *)data1,bpp1,sl1,IM1_SX,IM1_SY,endian1, 1);
 
   printf(" => Put Image1 ...");
   mlx_put_image_to_window(mlx,win1,im1,20,20);
@@ -164,7 +185,29 @@ int	main()
   data3 = mlx_get_data_addr(im3,&bpp3,&sl3,&endian3);
 
   printf(" => Fill Image3 ...");
-  color_map_2(data3,bpp3,sl3,IM3_SX,IM3_SY,endian3, 1);
+  color_map_2((unsigned char *)data3,bpp3,sl3,IM3_SX,IM3_SY,endian3, 1);
+
+  /* Draw 2D Shapes using new drawing extensions */
+  mlx_img_draw_rect(im3, 10, 10, 80, 80, 0xFF5555, 1); /* Filled Red Rect */
+  mlx_img_draw_rect(im3, 30, 30, 80, 80, 0x55FF55, 0); /* Outlined Green Rect */
+  mlx_img_draw_circle(im3, 180, 60, 40, 0x5555FF, 0);  /* Outlined Blue Circle */
+  mlx_img_draw_circle(im3, 180, 60, 25, 0xFFFF55, 1);  /* Filled Yellow Circle */
+  mlx_img_draw_line(im3, 10, 200, 230, 200, 0xFF55FF); /* Magenta line */
+
+  /* Put text using the new anti-flickering image-buffered text drawing */
+  mlx_img_string_put(im3, 10, 110, 0xFFFFFF, "Double-Buffered Text");
+  mlx_img_string_put_scaled(im3, 10, 130, 0x55FFFF, "SCALED", 2);
+
+  /* Load PNG sprite and blend it with opacity onto im3 */
+  png_sp = mlx_png_file_to_image(mlx, "test_sprite.png", &sp_w, &sp_h);
+  if (!png_sp)
+    png_sp = mlx_png_file_to_image(mlx, "test/test_sprite.png", &sp_w, &sp_h);
+  if (png_sp)
+    {
+      printf(" (loaded PNG %dx%d for blending) ", sp_w, sp_h);
+      mlx_blend_image_to_image(png_sp, im3, 80, 80, 0.7f);
+      mlx_destroy_image(mlx, png_sp);
+    }
 
   printf(" => Put Image3 ...");
   mlx_put_image_to_window(mlx,win1,im3,20,20);
@@ -206,7 +249,7 @@ int	main()
       exit(1);
     }
   data4 = mlx_get_data_addr(im4,&bpp4,&sl4,&endian4);
-  color_map_2(data4,bpp4,sl4,IM3_SX,IM3_SY,endian4, 2);
+  color_map_2((unsigned char *)data4,bpp4,sl4,IM3_SX,IM3_SY,endian4, 2);
 
   printf(" 3rd window, Installing hooks ...");
   win3 = mlx_new_window(mlx,WIN1_SX,WIN1_SY,"Title3");
@@ -242,6 +285,7 @@ int	color_map_1(void *win,int w,int h)
 	  mlx_pixel_put(mlx,win,x,y,color);
         }
     }
+  return (0);
 }
 
 
@@ -288,5 +332,5 @@ int	color_map_2(unsigned char *data,int bpp,int sl,int w,int h,int endian, int t
 	      }
         }
     }
-
+  return (0);
 }
